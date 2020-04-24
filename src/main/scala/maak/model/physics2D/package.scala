@@ -1,11 +1,15 @@
 package maak.model
 
+import scala.util.Random
+
 package object physics2D {
 
-  case class Randomizer(minValue: Double, maxValue: Double) {
-    def getValue: Double = minValue + math.random() * (maxValue - minValue)
-  }
-
+  /**
+   * 2D vector.
+   *
+   * @param x x value of vector
+   * @param y y value of vector
+   */
   case class Vector2D(x: Double, y: Double) {
 
     // Make sure that the vector has some magnitude to avoid division by zero
@@ -34,11 +38,19 @@ package object physics2D {
     def dotProduct(other: Vector2D): Double = x*other.x + y*other.y
   }
 
-  def createRandomUnitVector2D: Vector2D = {
-    val angle = math.random() * math.Pi * 2
-    Vector2D(math.cos(angle), math.sin(angle))
+  object Vector2D {
+    def createRandomUnit: Vector2D = {
+      val angle = Random.nextDouble() * math.Pi * 2
+      Vector2D(math.cos(angle), math.sin(angle))
+    }
   }
 
+  /**
+   * 2D point.
+   *
+   * @param x x value of point
+   * @param y y value of point
+   */
   case class Point2D(x: Double, y: Double) {
     def +(vector: Vector2D): Point2D = Point2D(x + vector.x, y + vector.y)
 
@@ -48,13 +60,19 @@ package object physics2D {
       math.sqrt(math.pow(x - other.x, 2) + math.pow(y - other.y, 2))
   }
 
-  case class OuterBoundary(minPosition: Point2D, maxPosition: Point2D)
-
   object Point2D {
-    def createRandom(outerBoundary: OuterBoundary): Point2D = {
-      val xPos = Randomizer(outerBoundary.minPosition.x, outerBoundary.maxPosition.x).getValue
-      val yPos = Randomizer(outerBoundary.minPosition.y, outerBoundary.maxPosition.y).getValue
+    def createRandom(outerBoundary: Rectangle2D): Point2D = {
+      val xPos = Random.between(outerBoundary.minPosition.x, outerBoundary.maxPosition.x)
+      val yPos = Random.between(outerBoundary.minPosition.y, outerBoundary.maxPosition.y)
       Point2D(xPos, yPos)
     }
   }
+
+  /**
+   * 2D rectangle.
+   *
+   * @param minPosition The minimum position (top left in most graphical coordinate systems) of the rectangle.
+   * @param maxPosition The maximum position (bottom right in most graphical coordinate systems) of the rectangle.
+   */
+  case class Rectangle2D(minPosition: Point2D, maxPosition: Point2D)
 }

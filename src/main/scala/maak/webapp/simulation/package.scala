@@ -1,6 +1,6 @@
 package maak.webapp
 
-import maak.model.physics2D.collisions._
+import maak.model.physics2D.Collisions._
 import maak.model.physics2D._
 
 import scala.annotation.tailrec
@@ -38,8 +38,8 @@ package object simulation {
   case class FixedIndividual(override val body: FixedCircle, override val infectionTime: Double,
                              override val immuneTime: Double) extends Individual(body, infectionTime, immuneTime)
 
-  case class IndividualSpawner(outerBoundary: OuterBoundary, minSpeed: Double = 10.0, maxSpeed: Double = 10.0,
-                           minRadius: Double = 10.0, maxRadius: Double = 10.0, infectionTime: Double,
+  case class IndividualSpawner(outerBoundary: Rectangle2D, minSpeed: Double = 10.0, maxSpeed: Double = 10.0,
+                               minRadius: Double = 10.0, maxRadius: Double = 10.0, infectionTime: Double,
                                immuneTime: Double, maxSpawnTime: Double = 1.0) {
     val circleSpawner = CircleSpawner(outerBoundary, minSpeed, maxSpeed, minRadius, maxRadius, maxSpawnTime)
 
@@ -68,13 +68,13 @@ package object simulation {
   }
 
   // Update
-  def updateAllIndividuals(passedTime: Double, boundary: OuterBoundary, fixedIndividuals: List[FixedIndividual],
-                movableIndividuals: List[MovableIndividual]) {
+  def updateAllIndividuals(passedTime: Double, boundary: Rectangle2D, fixedIndividuals: List[FixedIndividual],
+                           movableIndividuals: List[MovableIndividual]) {
 
     movableIndividuals.foreach(_.body.move(passedTime))
 
     @tailrec
-    def updateAllIndividualsInternal(passedTime: Double, boundary: OuterBoundary,
+    def updateAllIndividualsInternal(passedTime: Double, boundary: Rectangle2D,
                                      fixedIndividuals: List[FixedIndividual],
                                      movableIndividuals: List[MovableIndividual]) {
       movableIndividuals match {

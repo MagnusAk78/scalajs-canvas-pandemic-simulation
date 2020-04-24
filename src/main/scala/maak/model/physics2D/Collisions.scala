@@ -2,8 +2,9 @@ package maak.model.physics2D
 
 import scala.annotation.tailrec
 import scala.scalajs.js
+import scala.util.Random
 
-package object collisions {
+object Collisions {
 
   abstract class Circle {
     var position: Point2D
@@ -23,8 +24,13 @@ package object collisions {
     }
   }
 
-  case class CircleSpawner(outerBoundary: OuterBoundary, minSpeed: Double = 10.0, maxSpeed: Double = 10.0,
-                               minRadius: Double = 10.0, maxRadius: Double = 10.0, maxSpawnTime: Double = 1.0) {
+  case class CircleSpawner(outerBoundary: Rectangle2D, minSpeed: Double = 10.0, maxSpeed: Double = 10.0,
+                           minRadius: Double = 10.0, maxRadius: Double = 10.0, maxSpawnTime: Double = 1.0) {
+
+    def circleBoundary(radius: Double): Rectangle2D = {
+      val radiusVector = Vector2D(radius, radius)
+      Rectangle2D(outerBoundary.minPosition + radiusVector, outerBoundary.maxPosition + radiusVector.inverted)
+    }
 
     private def spawnRandomCircle[T <: Circle](createCircleFunc: () => T)(existingCircles: List[Circle]): Option[T] = {
       @tailrec
@@ -32,7 +38,7 @@ package object collisions {
         val newCircle = createCircleFunc()
         existingCircles.find(circle => newCircle.getOverlapWith(circle) > 0) match {
           case Some(_) =>
-            if((js.Date.now() - startTime) < maxSpawnTime) {
+            if ((js.Date.now() - startTime) < maxSpawnTime) {
               createRandomCircleInternal(startTime, existingCircles)
             } else {
               None
@@ -40,32 +46,29 @@ package object collisions {
           case None => Some(newCircle)
         }
       }
+
       createRandomCircleInternal(js.Date.now(), existingCircles)
     }
 
     def spawnRandomMovableCircle(existingCircles: List[Circle]): Option[MovableCircle] = {
       spawnRandomCircle[MovableCircle](createCircleFunc = () => {
-        val radius = Randomizer(minRadius, maxRadius).getValue
+        val radius = Random.between(minRadius, maxRadius)
         new MovableCircle(
-          position = Point2D.createRandom(OuterBoundary(minPosition = outerBoundary.minPosition + Vector2D(radius, radius),
-            maxPosition = outerBoundary.maxPosition + Vector2D(-radius, -radius))),
+          position = Point2D.createRandom(circleBoundary(radius)),
           radius = radius,
-          velocity = createRandomUnitVector2D.scale(Randomizer(minSpeed, maxSpeed).getValue))
+          velocity = Vector2D.createRandomUnit.scale(Random.between(minSpeed, maxSpeed)))
       })(existingCircles)
     }
 
     def spawnRandomFixedCircle(existingCircles: List[Circle]): Option[FixedCircle] = {
       spawnRandomCircle[FixedCircle](createCircleFunc = () => {
-        val radius = Randomizer(minRadius, maxRadius).getValue
-        new FixedCircle(
-          position = Point2D.createRandom(OuterBoundary(minPosition = outerBoundary.minPosition + Vector2D(radius, radius),
-            maxPosition = outerBoundary.maxPosition + Vector2D(-radius, -radius))),
-          radius = radius)
+        val radius = Random.between(minRadius, maxRadius)
+        new FixedCircle(position = Point2D.createRandom(circleBoundary(radius)), radius = radius)
       })(existingCircles)
     }
   }
 
-  def checkForCollisionAndUpdate(circle: MovableCircle, boundary: OuterBoundary): Boolean = {
+  def checkForCollisionAndUpdate(circle: MovableCircle, boundary: Rectangle2D): Boolean = {
     if (circle.position.x - circle.radius < boundary.minPosition.x) {
       circle.position = circle.position.copy(x = boundary.minPosition.x + circle.radius)
       circle.velocity = circle.velocity.invertX

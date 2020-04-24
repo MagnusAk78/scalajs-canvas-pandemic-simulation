@@ -1,6 +1,6 @@
 package maak.webapp.simulation
 
-import maak.model.physics2D.OuterBoundary
+import maak.model.physics2D.Rectangle2D
 import maak.model.physics2D.Point2D
 import maak.webapp.WebApp._
 import org.scalajs.dom
@@ -18,7 +18,7 @@ class Simulation(val simulationCanvas: Canvas, val graphCanvas: Canvas, val imag
   var fixedIndividuals: List[FixedIndividual] = List()
   var movableIndividuals: List[MovableIndividual] = List()
   val margin = 20.0
-  val outerBoundary = OuterBoundary(Point2D(margin, margin), Point2D(simulationCanvas.width - margin, simulationCanvas.height - margin))
+  val outerBoundary = Rectangle2D(Point2D(margin, margin), Point2D(simulationCanvas.width - margin, simulationCanvas.height - margin))
 
   // Set previous time to current time, this will constantly update in the loop
   var prev = js.Date.now()
@@ -46,7 +46,7 @@ class Simulation(val simulationCanvas: Canvas, val graphCanvas: Canvas, val imag
     val infectionTime = document.getElementById(InfectionTimeInfo.sliderId).asInstanceOf[HTMLInputElement].valueAsNumber
     val immuneTime = document.getElementById(ImmuneTimeInfo.sliderId).asInstanceOf[HTMLInputElement].valueAsNumber
 
-    val tuple = IndividualSpawner(outerBoundary: OuterBoundary, minSpeed = speed,
+    val tuple = IndividualSpawner(outerBoundary: Rectangle2D, minSpeed = speed,
       maxSpeed = speed, minRadius = radius, maxRadius = radius, infectionTime = infectionTime, immuneTime = immuneTime,
       maxSpawnTime = 1.0).spawnIndividuals(numberFixed, numberMovable, 1)
 
