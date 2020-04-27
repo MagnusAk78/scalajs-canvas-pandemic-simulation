@@ -1,10 +1,11 @@
 package maak.webapp.simulation
 
-import maak.model.physics2D.Rectangle2D
-import maak.model.physics2D.Point2D
+import maak.model.physics2D.shapes.{Circle2D, Rectangle2D}
+import maak.model.physics2D.Position2D
+import maak.model.physics2D.shapes.collisions.MovableCircle2D
 import maak.webapp.WebApp._
 import org.scalajs.dom
-import org.scalajs.dom.document
+import org.scalajs.dom.{CanvasRenderingContext2D, document}
 import org.scalajs.dom.html.Canvas
 import org.scalajs.dom.raw.{HTMLImageElement, HTMLInputElement}
 
@@ -13,18 +14,18 @@ import scala.scalajs.js
 class Simulation(val simulationCanvas: Canvas, val graphCanvas: Canvas, val imageNormal: HTMLImageElement, val imageInfected: HTMLImageElement,
                  val imageImmune: HTMLImageElement) {
 
-  val simulationCtx = simulationCanvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
-  val graphCtx = graphCanvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
-  var fixedIndividuals: List[FixedIndividual] = List()
-  var movableIndividuals: List[MovableIndividual] = List()
-  val margin = 20.0
-  val outerBoundary = Rectangle2D(Point2D(margin, margin), Point2D(simulationCanvas.width - margin, simulationCanvas.height - margin))
+  private val simulationCtx = simulationCanvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
+  private val graphCtx = graphCanvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
+  private var agents: List[Agent] = List()
+  private val margin = 20.0
+  private val outerBoundary: Rectangle2D = Rectangle2D(Position2D(margin, margin),
+    Position2D(simulationCanvas.width - margin, simulationCanvas.height - margin))
 
   // Set previous time to current time, this will constantly update in the loop
-  var prev = js.Date.now()
-  var prevGraphRender = js.Date.now()
+  private var prev: Double = js.Date.now()
+  private var prevGraphRender: Double = js.Date.now()
 
-  def getImage(individual: Individual): HTMLImageElement = individual.infected match {
+  private def getImage(individual: Agent): HTMLImageElement = individual.infected match {
     case true => imageInfected
     case false => individual.immune match {
       case true => imageImmune
@@ -46,15 +47,19 @@ class Simulation(val simulationCanvas: Canvas, val graphCanvas: Canvas, val imag
     val infectionTime = document.getElementById(InfectionTimeInfo.sliderId).asInstanceOf[HTMLInputElement].valueAsNumber
     val immuneTime = document.getElementById(ImmuneTimeInfo.sliderId).asInstanceOf[HTMLInputElement].valueAsNumber
 
-    val tuple = IndividualSpawner(outerBoundary: Rectangle2D, minSpeed = speed,
-      maxSpeed = speed, minRadius = radius, maxRadius = radius, infectionTime = infectionTime, immuneTime = immuneTime,
-      maxSpawnTime = 1.0).spawnIndividuals(numberFixed, numberMovable, 1)
+    agents = Agent.spawnRandomlyWithoutCollision(outerBoundary: Rectangle2D, radius,
+      maxVelocity = speed, infectionTime = infectionTime, immuneTime = immuneTime, numFixed = numberFixed,
+      numMoving = numberMovable, numInfected = 1)
 
-    fixedIndividuals = tuple._1
-    movableIndividuals = tuple._2
+    var realNumFixed = 0
+    var realNumMoving = 0
+    agents.foreach(_.body match {
+      case _: MovableCircle2D => realNumMoving += 1
+      case _: Circle2D => realNumFixed += 1
+    })
 
-    document.getElementById(FixedIndividualsInfo.labelId).textContent = "Fixed Individuals: " + fixedIndividuals.length
-    document.getElementById(MovableIndividualsInfo.labelId).textContent = "Movable Individuals: " + movableIndividuals.length
+    document.getElementById(FixedIndividualsInfo.labelId).textContent = "Fixed Individuals: " + realNumFixed
+    document.getElementById(MovableIndividualsInfo.labelId).textContent = "Movable Individuals: " + realNumMoving
     document.getElementById(SpeedInfo.labelId).textContent = "Speed: " + speed
     document.getElementById(RadiusInfo.labelId).textContent = "Radius: " + radius
     document.getElementById(InfectionTimeInfo.labelId).textContent = "InfectionTime: " + infectionTime
@@ -62,41 +67,32 @@ class Simulation(val simulationCanvas: Canvas, val graphCanvas: Canvas, val imag
   }
 
   // Update game objects
-  def update(passedTime: Double) {
-    updateAllIndividuals(passedTime, outerBoundary, fixedIndividuals, movableIndividuals)
+  private def update(passedTime: Double) {
+    updateAllAgents(passedTime, outerBoundary, agents)
   }
 
-  def renderSimulation() {
+  private def renderSimulation() {
     simulationCtx.clearRect(0, 0, simulationCanvas.width, simulationCanvas.height)
 
     simulationCtx.strokeStyle = "#2196F3"
     simulationCtx.strokeRect(margin, margin, simulationCanvas.width-margin*2, simulationCanvas.height-margin*2)
 
-    movableIndividuals.map(individual => {
-      simulationCtx.drawImage(getImage(individual),
-        math.floor(individual.body.position.x - individual.body.radius),
-        math.floor(individual.body.position.y - individual.body.radius),
-        math.floor(individual.body.radius*2),
-        math.floor(individual.body.radius*2))
-    })
-
-    fixedIndividuals.map(individual => {
-      simulationCtx.drawImage(getImage(individual),
-        math.floor(individual.body.position.x - individual.body.radius),
-        math.floor(individual.body.position.y - individual.body.radius),
-        math.floor(individual.body.radius*2),
-        math.floor(individual.body.radius*2))
+    agents.foreach(agent => {
+      simulationCtx.drawImage(getImage(agent),
+        math.floor(agent.body.center.x - agent.body.radius),
+        math.floor(agent.body.center.y - agent.body.radius),
+        math.floor(agent.body.radius*2),
+        math.floor(agent.body.radius*2))
     })
   }
 
-  var historicValues: List[(Double, Double)] = List()
+  private var historicValues: List[(Double, Double)] = List()
 
-  def renderGraph() {
-    val allIndividuals: List[Individual] = fixedIndividuals ::: movableIndividuals
-    val allInfected = allIndividuals.filter(_.infected)
-    val allImmune = allIndividuals.filter(_.immune)
+  private def renderGraph() {
+    val allInfected = agents.filter(_.infected)
+    val allImmune = agents.filter(_.immune)
 
-    val totalNum = allIndividuals.length.toDouble
+    val totalNum = agents.length.toDouble
     val immuneNum = allImmune.length.toDouble
     val infectedNum = allInfected.length.toDouble
     val healthyNum = totalNum - (immuneNum + infectedNum)
@@ -134,7 +130,7 @@ class Simulation(val simulationCanvas: Canvas, val graphCanvas: Canvas, val imag
     prevGraphRender = js.Date.now()
   }
 
-  val simulationLoop = () => {
+  private val simulationLoop: () => Unit = () => {
     val now = js.Date.now()
     val timeDeltaInSeconds = (now - prev) / 1000
 

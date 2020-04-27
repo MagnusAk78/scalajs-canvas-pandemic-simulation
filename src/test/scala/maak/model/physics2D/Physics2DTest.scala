@@ -4,45 +4,61 @@ import utest._
 
 object Physics2DTest extends TestSuite {
 
-  implicit class DoubleAddons(value: Double) {
-    def ~=(other: Double, precision: Double = 0.001): Boolean = {
-      if ((value - other).abs < precision) true else false
-    }
-  }
-
-  implicit class Vector2DAddons(vector: Vector2D) {
-    def ~=(other: Vector2D, precision: Double = 0.001): Boolean = {
-      (vector.x ~= (other.x, precision)) && (vector.y ~= (other.y, precision))
-    }
-  }
+  import FloatNumComparisions._
 
   def tests = Tests {
-    test("Vector2D magnitude") {
-      assert(Vector2D(3.0, 4.0).magnitude ~= 5.0)
+    val vector34 = Vector2D(3, 4)
+    test("Vector2D") {
+      val vectorNeg34 = Vector2D(-3, -4)
+
+      test("magnitude") {
+        assert(vector34.magnitude ~= 5)
+      }
+
+      test("unit") {
+        assert(Vector2D(34, 25).unit.magnitude ~= 1)
+      }
+
+      test("inverted") {
+        assert(vector34.inverted ~= vectorNeg34)
+      }
+
+      test("scale") {
+        assert(vector34.scaleTo(524).magnitude ~= 524)
+      }
+
+      test("dot_product") {
+        assert(vector34.dotProduct(vector34) ~= 25)
+      }
+
+      test("random_unit") {
+        assert(Vector2D.createRandomUnit.magnitude ~= 1)
+      }
+
+      test("angle_to_same") {
+        assert(Vector2D(1,0).angleTo(Vector2D(1,0)) ~= 0)
+      }
+
+      test("angle_to_opposite") {
+        assert(Vector2D(1,0).angleTo(Vector2D(-1,0)) ~= math.Pi)
+      }
+
+      test("angle_to_90deg_1") {
+        assert(Vector2D(1,0).angleTo(Vector2D(0,1)) ~= math.Pi/2)
+      }
+
+      test("angle_to_90deg_2") {
+        assert(Vector2D(1,0).angleTo(Vector2D(0,-1)) ~= -math.Pi/2)
+      }
     }
 
-    test("Vector2D unit") {
-      assert(Vector2D(34.0, 25.0).inverted ~= Vector2D(-34.0, -25.0))
-    }
+    test("Position2D") {
+      val position34 = Position2D(3, 4)
+      val position68 = Position2D(6, 8)
 
-    test("Vector2D inverted") {
-      assert(Vector2D(34.0, 25.0).unit.magnitude ~= 1.0)
-    }
-
-    test("Vector2D scale") {
-      assert(Vector2D(3.0, 4.0).scale(524.0).magnitude ~= 524.0)
-    }
-
-    test("Vector2D dot product") {
-      assert(Vector2D(3.0, 4.0).dotProduct(Vector2D(3.0, 4.0)) ~= 25.0)
-    }
-
-    test("Vector2D dot product2") {
-      assert(Vector2D(5.0, 2.0).dotProduct(Vector2D(4.0, 7.0)) ~= 34.0)
-    }
-
-    test("Vector2D random unit") {
-      assert(Vector2D.createRandomUnit.magnitude ~= 1.0)
+      test("add_vector") {
+        assert(position34 + vector34 ~= position68)
+      }
     }
   }
 }
