@@ -6,10 +6,10 @@ import maak.model.physics2D.shapes.{BoundaryBox}
 import scala.annotation.tailrec
 
 package object simulation {
-  private def updateEntityCollisions(fixedEntities: List[FixedEntity], movableEntities: List[MovableEntity]) {
+  private def updateEntityCollisions(fixedEntities: List[FixedEntity], movableEntities: List[MovableEntity]):Unit = {
     @tailrec
     def updateEntityCollisionsInternal(fixedEntities: List[FixedEntity], movableEntities: List[MovableEntity],
-                                      checkedMovableEntities: List[MovableEntity]) {
+                                      checkedMovableEntities: List[MovableEntity]):Unit = {
       movableEntities match {
         case firstMa :: restMas => {
           fixedEntities.foreach { fa: FixedEntity =>

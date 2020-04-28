@@ -31,18 +31,19 @@ object ShapesTest extends TestSuite {
         assert((bb.minPosition ~= Position2D.origo) && (bb.maxPosition ~= position5050))
       }
 
-      test("getDistanceToEdge_inner") {
+      test("getEdgePosition_inner") {
         val position2510 = Position2D(25, 10)
-        val distanceToEdge = boundaryBox50.getDistanceToEdge(position2510)
+        val edgePos = boundaryBox50.getEdgePosition(position2510)
+        val position250 = Position2D(25, 0)
 
-        assert(distanceToEdge ~= -10)
+        assert(edgePos ~= position250)
       }
 
       test("getDistanceToEdge_outer") {
         val positionNeg1010 = Position2D(-10, -10)
-        val distanceToEdge = boundaryBox50.getDistanceToEdge(positionNeg1010)
+        val edgePos = boundaryBox50.getEdgePosition(positionNeg1010)
 
-        assert(distanceToEdge ~= math.sqrt(200))
+        assert(edgePos ~= Position2D.origo)
       }
     }
 

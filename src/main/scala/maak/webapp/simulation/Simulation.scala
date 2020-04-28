@@ -64,11 +64,11 @@ class Simulation(val simulationCanvas: Canvas, val graphCanvas: Canvas, val imag
   }
 
   // Update game objects
-  private def update(passedTime: Double) {
+  private def update(passedTime: Double):Unit = {
     updateAllEntities(passedTime, outerBoundary, fixedEntities, movableEntities)
   }
 
-  private def renderSimulation() {
+  private def renderSimulation():Unit = {
     simulationCtx.clearRect(0, 0, simulationCanvas.width, simulationCanvas.height)
 
     simulationCtx.strokeStyle = "#2196F3"
@@ -93,7 +93,7 @@ class Simulation(val simulationCanvas: Canvas, val graphCanvas: Canvas, val imag
 
   private var historicValues: List[(Double, Double)] = List()
 
-  private def renderGraph() {
+  private def renderGraph():Unit = {
     val allInfected = fixedEntities.filter(_.infected) ::: movableEntities.filter(_.infected)
     val allImmune = fixedEntities.filter(_.immune) ::: movableEntities.filter(_.immune)
 

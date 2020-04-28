@@ -15,14 +15,14 @@ sealed abstract class Entity {
   var timeInfected: Double = 0.0
   var timeImmune: Double = 0.0
 
-  def infect() {
+  def infect():Unit = {
     if (!infected && !immune) {
       infected = true
       timeInfected = js.Date.now()
     }
   }
 
-  def update() {
+  def update():Unit = {
     if (infected && (js.Date.now() - timeInfected) / 1000 > infectionTimeSeconds) {
       infected = false
       immune = true

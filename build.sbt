@@ -14,3 +14,5 @@ testFrameworks += new TestFramework("utest.runner.Framework")
 scalaJSUseMainModuleInitializer := true
 
 jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
+
+scalacOptions ++= Seq("-deprecation", "-feature")
