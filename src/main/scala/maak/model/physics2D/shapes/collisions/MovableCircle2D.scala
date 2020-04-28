@@ -3,6 +3,8 @@ package maak.model.physics2D.shapes.collisions
 import maak.model.physics2D.shapes._
 import maak.model.physics2D._
 
+import scala.util.Random
+
 case class MovableCircle2D(override val center: Position2D, override val radius: Double,
                            override val velocity: Vector2D) extends CircleShape(center, radius)
   with Movable[MovableCircle2D] {
@@ -10,8 +12,14 @@ case class MovableCircle2D(override val center: Position2D, override val radius:
 }
 
 object MovableCircle2D {
+  def createRandom(outerBoundary: BoundaryBox, radius: Double, minSpeed: Double, maxSpeed: Double): MovableCircle2D = {
+    val center = Position2D(Random.between(outerBoundary.minPosition.x + radius, outerBoundary.maxPosition.x - radius),
+      Random.between(outerBoundary.minPosition.y + radius, outerBoundary.maxPosition.y - radius))
+    MovableCircle2D(center, radius, Vector2D.createRandomUnit.scaleTo(Random.between(minSpeed, maxSpeed)))
+  }
+
   def checkCollision(movableCircle: MovableCircle2D,
-                     outerBoundary: Rectangle2D): Option[MovableCircle2D] = {
+                     outerBoundary: BoundaryBox): Option[MovableCircle2D] = {
 
     val edgePos = outerBoundary.getEdgePosition(movableCircle.center)
     val distance = edgePos.distanceTo(movableCircle.center)
@@ -21,7 +29,7 @@ object MovableCircle2D {
 
       // Move circle to fit within outer boundary
       val radiusVector = Vector2D(movableCircle.radius, movableCircle.radius)
-      val centerBoundary = Rectangle2D(outerBoundary.minPosition + radiusVector,
+      val centerBoundary = BoundaryBox(outerBoundary.minPosition + radiusVector,
         outerBoundary.maxPosition + radiusVector.inverted)
       val newCenter = centerBoundary.getEdgePosition(movableCircle.center)
 

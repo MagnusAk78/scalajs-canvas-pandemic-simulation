@@ -8,39 +8,39 @@ object ShapesTest extends TestSuite {
   import maak.model.physics2D.FloatNumComparisions._
 
   def tests = Tests {
-    test("Rectangle2D") {
+    test("BoundaryBox") {
       val position5050 = Position2D(50, 50)
-      val rectangle50 = Rectangle2D(Position2D.origo, position5050)
+      val boundaryBox50 = BoundaryBox(Position2D.origo, position5050)
 
-      test("boundaryBox_min") {
-        assert(rectangle50.boundaryBox._1 ~= Position2D.origo)
+      test("min") {
+        assert(boundaryBox50.minPosition ~= Position2D.origo)
       }
 
-      test("boundaryBox_max") {
-        assert(rectangle50.boundaryBox._2 ~= position5050)
+      test("max") {
+        assert(boundaryBox50.maxPosition ~= position5050)
       }
 
       test("IllegalArgumentException") {
         intercept[IllegalArgumentException] {
-          Rectangle2D(Position2D(50, 0), Position2D(0, 50))
+          BoundaryBox(Position2D(50, 0), Position2D(0, 50))
         }
       }
 
-      test("createFromTwoPoints") {
-        val rect = Rectangle2D.createFromTwoPoints(Position2D(50, 0), Position2D(0, 50))
-        assert((rect.boundaryBox._1 ~= Position2D.origo) && (rect.boundaryBox._2 ~= position5050))
+      test("createBoundaryBox") {
+        val bb = BoundaryBox.createBoundaryBox(Position2D(50, 0), Position2D(0, 50))
+        assert((bb.minPosition ~= Position2D.origo) && (bb.maxPosition ~= position5050))
       }
 
       test("getDistanceToEdge_inner") {
         val position2510 = Position2D(25, 10)
-        val distanceToEdge = rectangle50.getDistanceToEdge(position2510)
+        val distanceToEdge = boundaryBox50.getDistanceToEdge(position2510)
 
         assert(distanceToEdge ~= -10)
       }
 
       test("getDistanceToEdge_outer") {
         val positionNeg1010 = Position2D(-10, -10)
-        val distanceToEdge = rectangle50.getDistanceToEdge(positionNeg1010)
+        val distanceToEdge = boundaryBox50.getDistanceToEdge(positionNeg1010)
 
         assert(distanceToEdge ~= math.sqrt(200))
       }
@@ -51,15 +51,11 @@ object ShapesTest extends TestSuite {
       val circle50 = Circle2D(Position2D.origo, radius50)
 
       test("boundaryBox_min") {
-        assert(circle50.boundaryBox._1 ~= Position2D(-radius50, -radius50))
+        assert(circle50.boundaryBox.minPosition ~= Position2D(-radius50, -radius50))
       }
 
       test("boundaryBox_max") {
-        assert(circle50.boundaryBox._2 ~= Position2D(radius50, radius50))
-      }
-
-      test("area") {
-        assert(circle50.area ~= (radius50 * radius50 * math.Pi))
+        assert(circle50.boundaryBox.maxPosition ~= Position2D(radius50, radius50))
       }
 
       test("diameter") {

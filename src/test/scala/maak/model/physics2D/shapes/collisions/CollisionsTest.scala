@@ -1,6 +1,6 @@
 package maak.model.physics2D.shapes.collisions
 
-import maak.model.physics2D.shapes.{Circle2D, Rectangle2D}
+import maak.model.physics2D.shapes.{Circle2D, BoundaryBox}
 import maak.model.physics2D.{Position2D, Vector2D}
 import utest.{TestSuite, Tests, intercept, test}
 
@@ -13,7 +13,7 @@ object CollisionsTest extends TestSuite {
     test("MovableCircle2D") {
       test("collision_outer_boundary") {
         val position100200 = Position2D(100, 200)
-        val outerBoundary100 = Rectangle2D(Position2D.origo, position100200)
+        val outerBoundary100 = BoundaryBox(Position2D.origo, position100200)
         val radius20 = 20
 
         test("reposition_min") {

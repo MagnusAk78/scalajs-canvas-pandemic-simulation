@@ -64,9 +64,6 @@ package object physics2D {
   }
 
   object Position2D {
-    def createRandom(minPosition: Position2D, maxPosition: Position2D): Position2D =
-      Position2D(Random.between(minPosition.x, maxPosition.x), Random.between(minPosition.y, maxPosition.y))
-
     lazy val origo: Position2D = Position2D(0, 0)
   }
 }

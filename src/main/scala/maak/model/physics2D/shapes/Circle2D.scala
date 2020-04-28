@@ -8,11 +8,10 @@ import scala.util.Random
 abstract class CircleShape(val center: Position2D, val radius: Double) extends Shape2D {
   require(radius > Double.MinPositiveValue)
 
-  override lazy val boundaryBox = (center + Vector2D(radius, radius).inverted, center + Vector2D(radius, radius))
+  override lazy val boundaryBox = BoundaryBox(center + Vector2D(radius, radius).inverted,
+    center + Vector2D(radius, radius))
 
   lazy val diameter: Double = radius * 2
-
-  lazy val area: Double = radius * radius * math.Pi
 
   def getOverlapWith(other: CircleShape): Double = (radius + other.radius) - center.distanceTo(other.center)
 }
@@ -25,10 +24,9 @@ abstract class CircleShape(val center: Position2D, val radius: Double) extends S
 case class Circle2D(override val center: Position2D, override val radius: Double) extends CircleShape(center, radius)
 
 object Circle2D {
-  def createRandom(outerBoundary: Rectangle2D, radius: Double): Circle2D = {
-    val radiusVector = Vector2D(radius, radius)
-    val circleBoundary = Rectangle2D(outerBoundary.minPosition + radiusVector, outerBoundary.maxPosition +
-      radiusVector.inverted)
-    Circle2D(Position2D.createRandom(circleBoundary.minPosition, circleBoundary.maxPosition), radius)
+  def createRandom(outerBoundary: BoundaryBox, radius: Double): Circle2D = {
+    val center = Position2D(Random.between(outerBoundary.minPosition.x + radius, outerBoundary.maxPosition.x - radius),
+      Random.between(outerBoundary.minPosition.y + radius, outerBoundary.maxPosition.y - radius))
+    Circle2D(center, radius)
   }
 }
