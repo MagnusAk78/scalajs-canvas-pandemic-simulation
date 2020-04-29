@@ -4,16 +4,17 @@ import scala.util.{Random, Try}
 
 package object physics2D {
 
-  /** Describes a vector in a 2D coordinate system.
-    *
-    * @param x x-value
-    * @param y y-value
-    */
+  /**
+   * Describes a vector in a 2D coordinate system.
+   *
+   * @param x x-value
+   * @param y y-value
+   */
   case class Vector2D(x: Double, y: Double) {
     /** Returns the magnitude (length) of a vector */
-    lazy val magnitude: Double = math.sqrt(x*x + y*y)
+    lazy val magnitude: Double = math.sqrt(x * x + y * y)
 
-    /** Returns the unit vector. It is a Vector2D with the same 'direction' as this but with a magnitude of 1*/
+    /** Returns the unit vector. It is a Vector2D with the same 'direction' as this but with a magnitude of 1 */
     lazy val unit: Vector2D = Vector2D(x / magnitude, y / magnitude)
 
     /** Returns a new Vector2D with the x and y values inverted compared to this Vector2D */
@@ -38,7 +39,7 @@ package object physics2D {
     def scaleTo(newMagnitude: Double): Vector2D = Vector2D(unit.x * newMagnitude, unit.y * newMagnitude)
 
     /** Returns the dot product of two Vector2D (x1 * x2 + y1 * y2) */
-    def dotProduct(other: Vector2D): Double = x*other.x + y*other.y
+    def dotProduct(other: Vector2D): Double = x * other.x + y * other.y
 
     /** Returns the angle between this Vector2D and another (between -Pi and Pi) */
     def angleTo(other: Vector2D): Double = {
@@ -48,17 +49,12 @@ package object physics2D {
     }
   }
 
-  object Vector2D {
-    /** Returns a unit Vector2D with a random 'direction' */
-    def createRandomUnit: Vector2D =
-      ((angle: Double) => Vector2D(math.cos(angle), math.sin(angle))).apply(Random.nextDouble() * math.Pi * 2)
-  }
-
-  /** Describes the position of a point in a 2D coordinate system.
-    *
-    * @param x x-value
-    * @param y y-value
-    */
+  /**
+   * Describes the position of a point in a 2D coordinate system.
+   *
+   * @param x x-value
+   * @param y y-value
+   */
   case class Position2D(x: Double, y: Double) {
     /** Returns a new Position2D with an added Vector2D */
     def +(vector: Vector2D): Position2D = Position2D(x + vector.x, y + vector.y)
@@ -69,6 +65,12 @@ package object physics2D {
     /** Returns the distance to another Position2D */
     def distanceTo(other: Position2D): Double =
       math.sqrt(math.pow(x - other.x, 2) + math.pow(y - other.y, 2))
+  }
+
+  object Vector2D {
+    /** Returns a unit Vector2D with a random 'direction' */
+    def createRandomUnit: Vector2D =
+      ((angle: Double) => Vector2D(math.cos(angle), math.sin(angle))).apply(Random.nextDouble() * math.Pi * 2)
   }
 
   object Position2D {

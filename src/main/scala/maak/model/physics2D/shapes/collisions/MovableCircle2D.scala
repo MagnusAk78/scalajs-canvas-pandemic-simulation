@@ -6,11 +6,11 @@ import maak.model.physics2D._
 import scala.util.Random
 
 /** Describes a movable circle. Implementation of CircleShape and Movable[MovableCircle2D]
-  *
-  * @param center   Position2D describing the center point of the circle
-  * @param radius   Radius of the circle
-  * @param velocity Velocity vector (Vector2D) of the circle (speed and direction)
-  */
+ *
+ * @param center   Position2D describing the center point of the circle
+ * @param radius   Radius of the circle
+ * @param velocity Velocity vector (Vector2D) of the circle (speed and direction)
+ */
 case class MovableCircle2D(override val center: Position2D, override val radius: Double,
                            override val velocity: Vector2D) extends CircleShape(center, radius)
   with Movable[MovableCircle2D] {
@@ -19,19 +19,20 @@ case class MovableCircle2D(override val center: Position2D, override val radius:
 
 object MovableCircle2D {
   /** Returns a MovableCircle2D, with specific radius and random velocity vector, randomly positioned
-    * completely within a given boundary box */
+   * completely within a given boundary box */
   def createRandom(outerBoundary: BoundaryBox, radius: Double, minSpeed: Double, maxSpeed: Double): MovableCircle2D = {
     val center = Position2D(Random.between(outerBoundary.minPosition.x + radius, outerBoundary.maxPosition.x - radius),
       Random.between(outerBoundary.minPosition.y + radius, outerBoundary.maxPosition.y - radius))
     MovableCircle2D(center, radius, Vector2D.createRandomUnit.scaleTo(Random.between(minSpeed, maxSpeed)))
   }
 
-  /** Checks if a MovableCircle2D has a collision with a BoundaryBox (hits walls from within)
-    *
-    * @param movableCircle The movable circle
-    * @param outerBoundary The boundary box
-    * @return Some(new movable circle) if a collision is detected otherwise None
-    */
+  /**
+   * Checks if a MovableCircle2D has a collision with a BoundaryBox (hits walls from within)
+   *
+   * @param movableCircle The movable circle
+   * @param outerBoundary The boundary box
+   * @return Some(new movable circle) if a collision is detected otherwise None
+   */
   def checkCollision(movableCircle: MovableCircle2D,
                      outerBoundary: BoundaryBox): Option[MovableCircle2D] = {
 
@@ -68,12 +69,13 @@ object MovableCircle2D {
     }
   }
 
-  /** Checks if two MovableCircle2D collides with each other
-    *
-    * @param movableCircle1 movable circle 1
-    * @param movableCircle2 movable circle 2
-    * @return Some((new movable circle 1, new movable circle 2)) if a collision is detected otherwise None
-    */
+  /**
+   * Checks if two MovableCircle2D collides with each other
+   *
+   * @param movableCircle1 movable circle 1
+   * @param movableCircle2 movable circle 2
+   * @return Some((new movable circle 1, new movable circle 2)) if a collision is detected otherwise None
+   */
   def checkCollision(movableCircle1: MovableCircle2D,
                      movableCircle2: MovableCircle2D): Option[(MovableCircle2D, MovableCircle2D)] = {
     val overlap = movableCircle1.getOverlapWith(movableCircle2)
@@ -102,12 +104,13 @@ object MovableCircle2D {
     }
   }
 
-  /** Checks if a MovableCircle2D collides with a fixed circle (Circle2D)
-    *
-    * @param movableCircle movable circle
-    * @param otherCircle fixed circle
-    * @return Some(new movable circle) if a collision is detected otherwise None
-    */
+  /**
+   * Checks if a MovableCircle2D collides with a fixed circle (Circle2D)
+   *
+   * @param movableCircle movable circle
+   * @param otherCircle   fixed circle
+   * @return Some(new movable circle) if a collision is detected otherwise None
+   */
   def checkCollision(movableCircle: MovableCircle2D, otherCircle: Circle2D): Option[MovableCircle2D] = {
     val overlap = movableCircle.getOverlapWith(otherCircle)
     if (overlap > 0) {

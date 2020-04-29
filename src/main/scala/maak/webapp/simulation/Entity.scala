@@ -7,40 +7,72 @@ import maak.model.physics2D.shapes.collisions.MovableCircle2D
 import scala.annotation.tailrec
 import scala.scalajs.js
 
-sealed abstract class Entity {
-  val infectionTimeSeconds: Double
-  val immuneTimeSeconds: Double
-  var infected: Boolean = false
-  var immune: Boolean = false
-  var timeInfected: Double = 0.0
-  var timeImmune: Double = 0.0
+sealed abstract class SimulationState
+case object Normal extends SimulationState
+case object Infected extends SimulationState
+case object Immune extends SimulationState
 
-  def infect():Unit = {
-    if (!infected && !immune) {
-      infected = true
-      timeInfected = js.Date.now()
+/** Describes an entity in the simulation. */
+sealed abstract class Entity {
+  /** The time an entity is infected */
+  protected val infectionTimeSeconds: Double
+  /** The time an entity is immune after infection */
+  protected val immuneTimeSeconds: Double
+  /** Entity state (normal, infected, immune) */
+  var state: SimulationState = Normal
+  /** The time the entity state changed */
+  private var timeStateChanged: Double = 0.0
+  /** A function that is called whenever a state is changed */
+  protected val stateChangedFunction: (SimulationState, SimulationState) => Unit
+
+  /** Infect this entity */
+  def infect(): Unit = state match {
+    case Normal => {
+      state = Infected
+      timeStateChanged = js.Date.now() / 1000
+      stateChangedFunction(Normal, Infected)
     }
+    case _ => //Do nothing
   }
 
-  def update():Unit = {
-    if (infected && (js.Date.now() - timeInfected) / 1000 > infectionTimeSeconds) {
-      infected = false
-      immune = true
-      timeImmune = js.Date.now()
-    }
+  /** Update infection and immune state depending on time */
+  def update(): Unit = {
+    val nowSeconds = js.Date.now() / 1000
+    val timeSinceStateChange = nowSeconds - timeStateChanged
 
-    if (immune && (js.Date.now() - timeImmune) / 1000 > immuneTimeSeconds) {
-      immune = false
+    state match {
+      case Infected => {
+        if (timeSinceStateChange > infectionTimeSeconds) {
+          state = Immune
+          timeStateChanged = nowSeconds
+          stateChangedFunction(Infected, Immune)
+        }
+      }
+      case Immune => {
+        if (state == Immune && timeSinceStateChange > immuneTimeSeconds) {
+          state = Normal
+          timeStateChanged = nowSeconds
+          stateChangedFunction(Immune, Normal)
+        }
+      }
+      case _ => //Do nothing
     }
   }
 }
 
+/** Describes a fixed entity in the simulation represented by a non movable CircleShape body (Circle2D) */
 case class FixedEntity(body: Circle2D, override val infectionTimeSeconds: Double,
-                       override val immuneTimeSeconds: Double) extends Entity
+                       override val immuneTimeSeconds: Double,
+                       override val stateChangedFunction: (SimulationState, SimulationState) => Unit) extends Entity
 
+/** Describes a movable entity in the simulation represented by a movable CircleShape body (MovableCircle2D) */
 case class MovableEntity(var body: MovableCircle2D, override val infectionTimeSeconds: Double,
-                         override val immuneTimeSeconds: Double) extends Entity
+                         override val immuneTimeSeconds: Double,
+                         override val stateChangedFunction: (SimulationState, SimulationState) => Unit) extends Entity
 
+/**
+ * A builder for entities. It spawns new randomly generated entities according to certain criteria.
+ */
 class EntitySpawner {
   var outerBoundary: BoundaryBox = BoundaryBox(Position2D.origo, Position2D(1, 1))
   var infectionTimeSeconds: Double = 1
@@ -52,6 +84,7 @@ class EntitySpawner {
   var numberMovableToSpawn: Int = 0
   var numberMovableInfected: Int = 1
   var maxSpawnTimeInSeconds: Double = 10.0
+  var stateChangedFunction: (SimulationState, SimulationState) => Unit = (_, _) => {}
 
   def withOuterBoundary(outerBoundary: BoundaryBox): EntitySpawner = {
     this.outerBoundary = outerBoundary
@@ -104,6 +137,11 @@ class EntitySpawner {
     this
   }
 
+  def withStateChangedFunction(stateChangedFunction: (SimulationState, SimulationState) => Unit): EntitySpawner = {
+    this.stateChangedFunction = stateChangedFunction
+    this
+  }
+
   def spawn(): (List[FixedEntity], List[MovableEntity]) = {
     @tailrec
     def spawnHelper(spawnedFixed: List[FixedEntity], spawnedMovable: List[MovableEntity],
@@ -117,16 +155,21 @@ class EntitySpawner {
           val newCircle = Circle2D.createRandom(outerBoundary, radius)
           spawnedFixed.find(_.body.getOverlapWith(newCircle) > 0) match {
             case Some(_) => spawnHelper(spawnedFixed, spawnedMovable, startTime)
-            case None => spawnHelper(FixedEntity(newCircle, infectionTimeSeconds, immuneTimeSeconds) :: spawnedFixed,
-              spawnedMovable, startTime)
+            case None => {
+              spawnHelper(FixedEntity(newCircle, infectionTimeSeconds, immuneTimeSeconds,
+                stateChangedFunction) :: spawnedFixed, spawnedMovable, startTime)
+            }
           }
         } else if (spawnedMovable.length < numberMovableToSpawn) {
           val newMovableCircle = MovableCircle2D.createRandom(outerBoundary, radius, minSpeed, maxSpeed)
           val allCircles: List[CircleShape] = spawnedFixed.map(_.body) ::: spawnedMovable.map(_.body)
           allCircles.find(_.getOverlapWith(newMovableCircle) > 0) match {
             case Some(_) => spawnHelper(spawnedFixed, spawnedMovable, startTime)
-            case None => spawnHelper(spawnedFixed,
-              MovableEntity(newMovableCircle, infectionTimeSeconds, immuneTimeSeconds) :: spawnedMovable, startTime)
+            case None => {
+              spawnHelper(spawnedFixed,
+                MovableEntity(newMovableCircle, infectionTimeSeconds, immuneTimeSeconds,
+                  stateChangedFunction) :: spawnedMovable, startTime)
+            }
           }
         } else {
           (spawnedFixed, spawnedMovable)

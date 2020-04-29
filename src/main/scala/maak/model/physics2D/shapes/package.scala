@@ -2,13 +2,14 @@ package maak.model.physics2D
 
 package object shapes {
 
-  /** Defines a rectangle in a 2D coordinate system where top and bottom are parallel to the x-axis
-    * and left and right sides are parallel to the y-axis. Meaning it can be defined by using only two
-    * points in a 2D coordinate system.
-    *
-    * @param minPosition Minimum position (top-left in most 2D graphics coordinates)
-    * @param maxPosition Maximum position (bottom-right in most 2D graphics coordinates)
-    */
+  /**
+   * Defines a rectangle in a 2D coordinate system where top and bottom are parallel to the x-axis
+   * and left and right sides are parallel to the y-axis. Meaning it can be defined by using only two
+   * points in a 2D coordinate system.
+   *
+   * @param minPosition Minimum position (top-left in most 2D graphics coordinates)
+   * @param maxPosition Maximum position (bottom-right in most 2D graphics coordinates)
+   */
   @throws[IllegalArgumentException]
   case class BoundaryBox(minPosition: Position2D, maxPosition: Position2D) {
     require(minPosition.x < maxPosition.x && minPosition.y < maxPosition.y)
@@ -59,12 +60,12 @@ package object shapes {
 
   object BoundaryBox {
     /**
-      * Creates a BoundaryBox from any two (different in both x and y axis) Position2D that are not
-      * necessarily top/left and bottom/right.
-      *
-      * @param position1 One corner of the bounding box.
-      * @param position2 The opposite corner of the bounding box.
-      */
+     * Creates a BoundaryBox from any two (different in both x and y axis) Position2D that are not
+     * necessarily top/left and bottom/right.
+     *
+     * @param position1 One corner of the bounding box.
+     * @param position2 The opposite corner of the bounding box.
+     */
     def createBoundaryBox(position1: Position2D, position2: Position2D): BoundaryBox = {
       val minPosition = Position2D(math.min(position1.x, position2.x), math.min(position1.y, position2.y))
       val maxPosition = Position2D(math.max(position1.x, position2.x), math.max(position1.y, position2.y))

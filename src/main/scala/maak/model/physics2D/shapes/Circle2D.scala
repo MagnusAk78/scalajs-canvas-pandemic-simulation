@@ -4,11 +4,12 @@ import maak.model.physics2D.{Position2D, Vector2D}
 
 import scala.util.Random
 
-/** Describes a circle shape
-  *
-  * @param center Position2D describing the center point of the circle
-  * @param radius Radius of the circle
-  */
+/**
+ * Describes a circle shape
+ *
+ * @param center Position2D describing the center point of the circle
+ * @param radius Radius of the circle
+ */
 @throws[IllegalArgumentException]
 abstract class CircleShape(val center: Position2D, val radius: Double) extends Shape2D {
   require(radius > Double.MinPositiveValue)
@@ -24,11 +25,12 @@ abstract class CircleShape(val center: Position2D, val radius: Double) extends S
   def getOverlapWith(other: CircleShape): Double = (radius + other.radius) - center.distanceTo(other.center)
 }
 
-/** Implementation of the CircleShape
-  *
-  * @param center Position2D describing the center point of the circle
-  * @param radius Radius of the circle
-  */
+/**
+ * Implementation of the CircleShape
+ *
+ * @param center Position2D describing the center point of the circle
+ * @param radius Radius of the circle
+ */
 case class Circle2D(override val center: Position2D, override val radius: Double) extends CircleShape(center, radius)
 
 object Circle2D {
