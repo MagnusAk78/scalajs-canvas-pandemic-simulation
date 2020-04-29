@@ -1,4 +1,4 @@
-# scalajs-canvas-pandemic-simulation
+# Scala.js demo - Simulation of pandemic outbreak
 
 [![Build Status](http://img.shields.io/travis/badges/badgerbadgerbadger.svg?style=flat-square)](https://travis-ci.org/badges/badgerbadgerbadger) 
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
@@ -12,10 +12,10 @@
 * [Screenshot](#screenshot)
 
 ## General info
-This is a Scala.js/canvas demo. The purpose of writing this demo was to learn how to use Scala.js to write
-front end web applications for the web with Scala code. Since this has been done during the time of 
-Covid-19 quarantine the application is a simple simulation of a pandemic outbreak with bouncing circles that
-spreads an infection and get immunity afterwords. The starting conditions can easily be changed using sliders. 
+The purpose of writing this demo was to learn how to use Scala.js to write front-end web applications for the web 
+with Scala code. Since this has been done during the time of Covid-19 the application is a simple simulation of a 
+pandemic outbreak with bouncing circles that spreads an infection and get immunity after some time. The starting 
+conditions can easily be changed using sliders. 
 
 #### Features
 * 2D Physics library for moving and bouncing circles
