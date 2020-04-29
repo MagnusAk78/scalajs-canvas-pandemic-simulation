@@ -10,6 +10,7 @@
 * [Run](#run)
 * [Test](#test)
 * [Screenshot](#screenshot)
+* [License](#license)
 
 ## General info
 The purpose of writing this demo was to learn how to use Scala.js to write front-end web applications for the web 
@@ -72,3 +73,6 @@ $ sbt test
 ## Screenshot
 Screenshot when running in Chrome and profiling with the developer tools
 ![Screenshot](./images/screenshot.jpg)
+
+## License
+- **[MIT license](http://opensource.org/licenses/mit-license.php)**
